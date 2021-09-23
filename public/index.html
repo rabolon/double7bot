@@ -14,7 +14,7 @@
   <div id="plot"></div>
 
   <script>
-    function plot(openTime, open, high, low, close, volume, bBands, operationMarkers ) {
+    function plot(openTime, open, high, low, close, volume, bBands, prices ) {
       //const timeSma = openTime.slice(openTime.length-sma[0].length);
       const timeBBands = openTime.slice(openTime.length-bBands[0].length);
 
@@ -32,8 +32,8 @@
       };
 
       var trace2 = {
-        x: timeBBands,
-        y: operationMarkers,
+        x: openTime,
+        y: prices,
         mode: 'markers',
         type: 'scatter',
         line: { color: 'blue', width: 3 }
@@ -61,6 +61,7 @@
 
       var layout = {
         //dragmode: 'zoom',
+        height: 600,
         margin: { r: 10, l: 25, b: 40, l: 60 },
         title: 'Bot analyze',
         
@@ -77,11 +78,13 @@
   </script>
 
   <script>
+setInterval(() => {
     fetch('./data')
       .then(response => response.json())
       .then(json => {
-        plot(json.openTime, json.open, json.high, json.low, json.close, json.volume, json.bBands, json.operationMarkers);
-        console.log(json.openTime, json.open, json.high, json.low, json.close, json.volume, json.bBands, json.operationMarkers);
-      });
+        plot(json.openTime, json.open, json.high, json.low, json.close, json.volume, json.bBands, json.prices);
+        // console.log(json.openTime, json.open, json.high, json.low, json.close, json.volume, json.bBands, json.prices);
+        console.log(json.prices);
+      });}, 5000);
   </script>
 </body>
