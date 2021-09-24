@@ -29,7 +29,7 @@ let lastIndex;
 let initPrice = 0;
 let lastPrice = 0;
 const bbandsLength = 20;
-const stdDeviations = 2.7;
+const stdDeviations = 2.5;
 let tick = 1;
 let intiTime = new Date().getTime();
 
@@ -138,6 +138,13 @@ function double7(price) {
     dataPlot.prices[lastIndex] = price;
     base = base - allocation * price;
   }
+  else if (price < dataPlot.bBands[1][lastIndex] && (status == 'BUY')) {
+    status = 'INIT';
+  }
+  else if (price > dataPlot.bBands[1][lastIndex] && (status == 'SELL')) {
+    status = 'INIT';
+  }
+
 }
 
 
