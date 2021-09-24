@@ -15,9 +15,6 @@
 
   <script>
     function plot(openTime, open, high, low, close, volume, bBands, prices ) {
-      //const timeSma = openTime.slice(openTime.length-sma[0].length);
-      const timeBBands = openTime.slice(openTime.length-bBands[0].length);
-
       var trace1 = {
         x: openTime,
         close: close,
@@ -36,22 +33,22 @@
         y: prices,
         mode: 'markers',
         type: 'scatter',
-        line: { color: 'blue', width: 3 }
+        line: { color: 'blue', width: 6 }
       };
 
       var trace3 = {
-        x: timeBBands,
+        x: openTime,
         y: bBands[0],
         line: { color: 'green', width: 1}
       }
 
       var trace4 = {
-        x: timeBBands,
+        x: openTime,
         y: bBands[1],
         line: { color: 'grey', width: 1}
       }
       var trace5 = {
-        x: timeBBands,
+        x: openTime,
         y: bBands[2],
         line: { color: 'red', width: 1}
       }

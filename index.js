@@ -20,7 +20,7 @@ let dataPlot = {
 
 let firstTime = true;
 const allocation = 0.00025;
-let status = 'SELL';
+let status = 'INIT';
 let sellQty = 0;
 let buyQty = 0;
 let asset = 0;
@@ -29,7 +29,7 @@ let lastIndex;
 let initPrice = 0;
 let lastPrice = 0;
 const bbandsLength = 20;
-const stdDeviations = 1;
+const stdDeviations = 2.7;
 let tick = 1;
 
 
@@ -44,6 +44,7 @@ async function run() {
   if (firstTime) {
     //let endTime = new Date("2021/09/13 20:16:00").getTime();
     let endTime = new Date().getTime();
+    endTime = endTime - endTime % 60000;      // let complete the candle
     let startTime = endTime - (4 * 3600 * 1000);
 
     const klines = await api.candleStickData('BTCUSDT', '1m', startTime, endTime, 1000);
@@ -53,8 +54,15 @@ async function run() {
     dataPlot.low = klines.map(value => value[3]);
     dataPlot.close = klines.map(value => value[4]);
     dataPlot.volume = klines.map(value => value[5]);
-
     dataPlot.bBands = await tulind.indicators.bbands.indicator([dataPlot.close], [bbandsLength, stdDeviations]);
+    // completes the bBands length with NaN
+    let pad = new Array(bbandsLength-1).fill(NaN);
+    dataPlot.bBands[0].unshift(...(pad));
+    dataPlot.bBands[1].unshift(...(pad));
+    dataPlot.bBands[2].unshift(...(pad));
+
+
+    //console.log(dataPlot.bBands[0], dataPlot.openTime);
 
     lastIndex = dataPlot.openTime.length - 1;
 
@@ -82,12 +90,18 @@ async function run() {
       dataPlot.close.push(newKline[0][4]);
       dataPlot.volume.push(newKline[0][5]);
 
-      dataPlot.bBands = await tulind.indicators.bbands.indicator([dataPlot.close], [bbandsLength, stdDeviations]);
+      //dataPlot.bBands = await tulind.indicators.bbands.indicator([dataPlot.close], [bbandsLength, stdDeviations]);
+      let pad =  await tulind.indicators.bbands.indicator([dataPlot.close.slice(-bbandsLength)], [bbandsLength, stdDeviations]);
+      dataPlot.bBands[0].shift();
+      dataPlot.bBands[1].shift();
+      dataPlot.bBands[2].shift();
+      dataPlot.bBands[0].push(...pad[0]);
+      dataPlot.bBands[1].push(...pad[1]);
+      dataPlot.bBands[2].push(...pad[2]);
+       
       dataPlot.prices.shift();
       dataPlot.prices.push(NaN);
       lastPrice = dataPlot.close[lastIndex];
-
-
     }
 
     const price = await api.symbolPriceTicker('BTCUSDT');
@@ -105,15 +119,14 @@ async function run() {
 
 // Bot
 function double7(price) {
-  //console.log(price, dataPlot.bBands[2][lastIndex - bbandsLength - 1], dataPlot.bBands[0][lastIndex - bbandsLength - 1], status);
-  if (price > dataPlot.bBands[2][lastIndex - bbandsLength - 1] && status == 'SELL') {
+  if (price > dataPlot.bBands[2][lastIndex] && (status == 'SELL' || status == 'INIT')) {
     status = 'BUY';
     sellQty++;
     asset = asset - allocation;
     dataPlot.prices[lastIndex] = price;
     base = base + allocation * price;
   }
-  else if (price < dataPlot.bBands[0][lastIndex - bbandsLength - 1] && status == 'BUY') {
+  else if (price < dataPlot.bBands[0][lastIndex] && (status == 'BUY' || status == 'INIT')) {
     status = 'SELL';
     buyQty++;
     asset = asset + allocation;
