@@ -1,4 +1,4 @@
-// Se remplaza la información de coingecko por la de binance
+// come back to INIT when cross the middle bollinger band
 
 // Modules
 const api = require('./api');
