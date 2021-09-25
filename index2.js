@@ -28,8 +28,8 @@ let base = 0;
 let lastIndex;
 let initPrice = 0;
 let lastPrice = 0;
-const bbandsLength = 20;
-const stdDeviations = 2.5;
+const bbandsLength = 30;
+const stdDeviations = 3;
 let tick = 1;
 let intiTime = new Date().getTime();
 
@@ -46,7 +46,7 @@ async function run() {
 
     let endTime = new Date().getTime();
     endTime = endTime - endTime % 60000;      // let complete the candle
-    let startTime = endTime - (6 * 3600 * 1000);
+    let startTime = endTime - (12 * 3600 * 1000);
 
     const klines = await api.candleStickData('BTCUSDT', '1m', startTime, endTime, 1000);
     dataPlot.openTime = klines.map(value => value[0]);
@@ -110,14 +110,13 @@ async function run() {
 
     let now = new Date().getTime();
     let elapsed = now - intiTime;
-    //console.log(msToTime(elapsed));
 
 
     console.log(`----------------------------------------------------------------------------------------`);
-    console.log(`${msToTime(elapsed)}, Status: ${status}, Sells: ${sellQty}, Buys: ${buyQty}`);
-    console.log(`Init price: ${parseFloat(initPrice).toFixed(2)}, last close price: ${parseFloat(dataPlot.close[lastIndex]).toFixed(2)}, tick price: ${parseFloat(price.price).toFixed(2)}`);
-    console.log(`Asset: ${asset}, Base: ${base}, Profit: ${parseFloat(asset * lastPrice + base).toFixed(2)}`);
-    console.log('Estimated fees: ', (sellQty + buyQty) * allocation * lastPrice * 0.00075);
+    console.log(`${msToTime(elapsed)}, BB: ${stdDeviations}-${bbandsLength}, Status: ${status}, Sells: ${sellQty}, Buys: ${buyQty}`);
+    console.log(`Init price: ${parseFloat(initPrice).toFixed(2)}, tick price: ${parseFloat(price.price).toFixed(2)}`);
+    console.log(`Asset: ${asset}, Base: ${base}, Profit: ${parseFloat(asset * price.price + base).toFixed(2)}`);
+    console.log('Estimated fees: ', (sellQty + buyQty) * allocation * price.price * 0.00075);
   }
 }
 
